@@ -11,46 +11,49 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final AuthenticationManager authenticationManager;
-    public AuthorizationServerConfig (BCryptPasswordEncoder bCryptPasswordEncoder,
-                                      AuthenticationManager authenticationManager) {
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.authenticationManager = authenticationManager;
-    }
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final AuthenticationManager authenticationManager;
 
-    @Override
-    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-        security.tokenKeyAccess("permitAll()")
-                .checkTokenAccess("isAuthenticated()");
-    }
+  public AuthorizationServerConfig(
+      BCryptPasswordEncoder bCryptPasswordEncoder, AuthenticationManager authenticationManager) {
+    this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    this.authenticationManager = authenticationManager;
+  }
 
-    @Override
-    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory().withClient("postmanapp")
+  @Override
+  public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+    security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
+  }
+
+  @Override
+  public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+    clients
+        .inMemory()
+        .withClient("postmanapp")
         .secret(bCryptPasswordEncoder.encode("01234"))
-                .scopes("read", "write")
-                .authorizedGrantTypes("password", "refresh_token")
-                .accessTokenValiditySeconds(7200)
-                .refreshTokenValiditySeconds(3600);
-    }
+        .scopes("read", "write")
+        .authorizedGrantTypes("password", "refresh_token")
+        .accessTokenValiditySeconds(7200)
+        .refreshTokenValiditySeconds(3600);
+  }
 
-    @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints.authenticationManager(authenticationManager)
-                .tokenStore(tokenStore())
-                .accessTokenConverter(accessTokenConverter());
-    }
+  @Override
+  public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+    endpoints
+        .authenticationManager(authenticationManager)
+        .tokenStore(tokenStore())
+        .accessTokenConverter(accessTokenConverter());
+  }
 
-    @Bean
-    public JwtTokenStore tokenStore() {
-        return new JwtTokenStore(accessTokenConverter());
-    }
+  @Bean
+  public JwtTokenStore tokenStore() {
+    return new JwtTokenStore(accessTokenConverter());
+  }
 
-    @Bean
-    public JwtAccessTokenConverter accessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setSigningKey("secret");
-        return jwtAccessTokenConverter;
-    }
+  @Bean
+  public JwtAccessTokenConverter accessTokenConverter() {
+    JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+    jwtAccessTokenConverter.setSigningKey("secret");
+    return jwtAccessTokenConverter;
+  }
 }

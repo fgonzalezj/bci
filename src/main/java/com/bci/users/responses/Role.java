@@ -7,8 +7,9 @@ import lombok.Data;
 @Data
 @Builder
 public class Role {
-    @JsonProperty("id")
-    private String id;
-    @JsonProperty("name")
-    private String name;
+  @JsonProperty("id")
+  private String id;
+
+  @JsonProperty("name")
+  private String name;
 }

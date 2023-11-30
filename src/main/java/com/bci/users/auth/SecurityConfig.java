@@ -13,34 +13,34 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final UsersService usersService;
+  private final UsersService usersService;
 
-    public SecurityConfig(UsersService usersService) {
-        this.usersService = usersService;
-    }
+  public SecurityConfig(UsersService usersService) {
+    this.usersService = usersService;
+  }
 
-    @Bean
-    public static BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  public static BCryptPasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        // TODO configure authentication manager
-        auth.userDetailsService(usersService).passwordEncoder(passwordEncoder());
-    }
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    // TODO configure authentication manager
+    auth.userDetailsService(usersService).passwordEncoder(passwordEncoder());
+  }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        // TODO:Remove when JWT is active
-        http.csrf().disable().authorizeRequests().anyRequest().permitAll();
-        http.csrf().disable();
-        http.headers().frameOptions().disable();
-    }
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    // TODO:Remove when JWT is active
+    http.csrf().disable().authorizeRequests().anyRequest().permitAll();
+    http.csrf().disable();
+    http.headers().frameOptions().disable();
+  }
 
-    @Override
-    @Bean
-    protected AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
-    }
+  @Override
+  @Bean
+  protected AuthenticationManager authenticationManager() throws Exception {
+    return super.authenticationManager();
+  }
 }
