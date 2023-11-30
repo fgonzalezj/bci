@@ -17,7 +17,6 @@ import java.util.UUID;
 public class Phones implements Serializable {
     private static final long serialVersionUID = -2066253186624942054L;
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
     private String number;
     private String cityCode;

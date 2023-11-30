@@ -33,9 +33,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // TODO:Remove when JWT is active
-        //http.csrf().disable().authorizeRequests().anyRequest().permitAll();
-        //http.csrf().disable();
-        //http.headers().frameOptions().disable();
+        http.csrf().disable().authorizeRequests().anyRequest().permitAll();
+        http.csrf().disable();
+        http.headers().frameOptions().disable();
     }
 
     @Override

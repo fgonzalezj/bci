@@ -3,9 +3,14 @@ package com.bci.users.services;
 import com.bci.users.entities.Phones;
 import com.bci.users.entities.Roles;
 import com.bci.users.entities.Users;
+import com.bci.users.exceptions.ConflictException;
+import com.bci.users.exceptions.ExceptionDetail;
 import com.bci.users.repositories.PhonesRepository;
 import com.bci.users.repositories.UsersRepository;
-import javassist.NotFoundException;
+import com.bci.users.requests.UserRequest;
+import com.bci.users.responses.Phone;
+import com.bci.users.responses.Role;
+import com.bci.users.responses.UserResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,9 +22,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -59,34 +64,51 @@ public class UsersService implements UserDetailsService {
                 authorities);
     }
 
-    public void createUser (com.bci.users.requests.User user) {
-        List<Roles> roles =  user.getRoles().stream().map(role -> {
+    public UserResponse createUser (UserRequest userRequest) {
+        if (usersRepository.findByEmail(userRequest.getEmail()).isPresent()) {
+            throw new ConflictException(
+                    String.format("User with email %s already exists.",userRequest.getEmail())
+            );
+        }
+        List<Roles> roles =  userRequest.getRoles().stream().map(role -> {
             return Roles.builder()
+                    .id(UUID.randomUUID().toString())
                     .name(role.getName())
                     .build();
         }).collect(Collectors.toList());
 
-        var users = Users.builder()
-                .email(user.getEmail())
+        var user = Users.builder()
+                .id(UUID.randomUUID().toString())
+                .email(userRequest.getEmail())
                 .isActive(Boolean.TRUE)
                 .lastLogin(ZonedDateTime.now())
-                .password(bCryptPasswordEncoder.encode(user.getPassword()))
+                .password(bCryptPasswordEncoder.encode(userRequest.getPassword()))
                 .created(ZonedDateTime.now())
-                .username(user.getName())
+                .username(userRequest.getName())
                 .roles(roles)
                 .build();
-        var usersSaved = usersRepository.save(users);
-        List<Phones> phones =  user.getPhones().stream().map(phone -> {
+
+        var userSaved = usersRepository.save(user);
+
+        List<Phones> phones =  userRequest.getPhones().stream().map(phone -> {
             return Phones.builder().cityCode(phone.getCityCode())
+                    .id(UUID.randomUUID().toString())
                     .countryCode(phone.getCountryCode())
                     .number(phone.getNumber())
-                    .users(usersSaved)
+                    .users(userSaved)
                     .build();
         }).collect(Collectors.toList());
         phonesRepository.saveAll(phones);
+        return UserResponse
+                .builder()
+                .id(UUID.fromString(userSaved.getId()))
+                .created(userSaved.getCreated())
+                .lastLogin(userSaved.getLastLogin())
+                .isActive(userSaved.isActive())
+                .build();
     }
 
-    public List<com.bci.users.responses.User> retrieveAllUsers () {
+    public List<UserResponse> retrieveAllUsers () {
         var users = usersRepository.findAll();
         if (users.isEmpty()) {
             return Collections.EMPTY_LIST;
@@ -94,25 +116,29 @@ public class UsersService implements UserDetailsService {
 
         return users.stream().map(user -> {
             var roles = user.getRoles().stream().map(role -> {
-                return com.bci.users.responses.Role.builder()
+                return Role.builder()
                         .id(role.getId().toString())
                         .name(role.getName())
                         .build();
             }).collect(Collectors.toList());
             log.info(roles);
             var phones = user.getPhones().stream().map(phone -> {
-                return com.bci.users.responses.Phone.builder()
+                return Phone.builder()
                         .number(phone.getNumber())
                         .cityCode(phone.getCityCode())
                         .countryCode(phone.getCountryCode())
                         .build();
             }).collect(Collectors.toList());
-            return com.bci.users.responses.User.builder()
-                    .name(user.getUsername())
-                    .email(user.getEmail())
-                    .password(user.getPassword())
-                    .roles(roles)
-                    .phones(phones)
+            return UserResponse.builder()
+                    .id(UUID.fromString(user.getId()))
+                    .created(user.getCreated())
+                    .lastLogin(user.getLastLogin())
+                    .isActive(user.isActive())
+                    //.name(user.getUsername())
+                    //.email(user.getEmail())
+                    //.password(user.getPassword())
+                    //.roles(roles)
+                    //.phones(phones)
                     .build();
 
         }).collect(Collectors.toList());

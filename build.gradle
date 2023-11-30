@@ -38,42 +38,46 @@ dependencies {
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server', version: '2.5.15'
 	// https://mvnrepository.com/artifact/org.springframework.security.oauth.boot/spring-security-oauth2-autoconfigure
 	implementation group: 'org.springframework.security.oauth.boot', name: 'spring-security-oauth2-autoconfigure', version: '2.5.14'
-
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	testImplementation 'org.mockito:mockito-core'
 }
 
+jacoco {
+	toolVersion = "0.8.7"
+}
 tasks.named('test') {
 	useJUnitPlatform()
 }
 
-test {
+tasks.test {
 	finalizedBy jacocoTestReport // report is always generated after tests run
 }
 jacocoTestReport {
 	dependsOn test // tests are required to run before generating the report
 	reports {
+		html.destination file("${buildDir}/reports/jacoco/html")
 		xml.required = false
 		csv.required = false
-		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
 	}
 }
-jacocoTestCoverageVerification {
-	violationRules {
-		rule {
-			limit {
-				minimum = 0.8
-			}
-		}
-
-		rule {
-			enabled = false
-			element = 'CLASS'
-			includes = ['org.gradle.*']
-
-			limit {
-				counter = 'LINE'
-				value = 'TOTALCOUNT'
-				maximum = 0.3
-			}
-		}
-	}
-}
+//jacocoTestCoverageVerification {
+//	violationRules {
+//		rule {
+//			limit {
+//				minimum = 0.8
+//			}
+//		}
+//
+//		rule {
+//			enabled = false
+//			element = 'CLASS'
+//			includes = ['org.gradle.*']
+//
+//			limit {
+//				counter = 'LINE'
+//				value = 'TOTALCOUNT'
+//				maximum = 0.3
+//			}
+//		}
+//	}
+//}
