@@ -21,6 +21,7 @@ public class Users implements Serializable {
   private ZonedDateTime lastLogin;
   private boolean isActive;
   private String username;
+  private String token;
 
   @Column(unique = true)
   private String email;

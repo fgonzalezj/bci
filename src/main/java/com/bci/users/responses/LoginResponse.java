@@ -1,14 +1,16 @@
 package com.bci.users.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.ZonedDateTime;
-import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
+
 @Data
 @Builder
-public class UserResponse {
+public class LoginResponse {
   @JsonProperty("id")
   private UUID id;
 
@@ -22,9 +24,12 @@ public class UserResponse {
   private boolean isActive;
   @JsonProperty("token")
   private String token;
-  //    private String name;
-  //    private String email;
-  //    private String password;
-  //    private List<Phone> phones;
-  //    private List<Role> roles;
+  @JsonProperty("name")
+  private String name;
+  @JsonProperty("email")
+  private String email;
+  @JsonProperty("password")
+  private String password;
+  @JsonProperty("phones")
+  private List<Phone> phones;
 }

@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.bci.users.auth.JwtUtil;
 import com.bci.users.entities.Phones;
 import com.bci.users.entities.Roles;
 import com.bci.users.entities.Users;
@@ -16,10 +17,16 @@ import com.bci.users.requests.Role;
 import com.bci.users.requests.UserRequest;
 import com.bci.users.responses.UserResponse;
 import com.bci.users.services.impl.UsersServiceImpl;
+
+import java.security.Key;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +36,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.Validator;
+
+import javax.crypto.spec.SecretKeySpec;
 
 @ExtendWith({MockitoExtension.class})
 class UsersServiceImplTest {
@@ -42,6 +51,7 @@ class UsersServiceImplTest {
   private static final String PHONE_NUMBER = "5534123456";
   private static final String COUNTRY_CODE = "55";
   private static final String CITY_CODE = "23";
+  private static final String SECRET_KEY = "a7ZwvHhJ6759kb3EZS/TKXzCl59Qpz6K5AMxvQlDtnY=";
 
   private Users user;
 
@@ -76,6 +86,7 @@ class UsersServiceImplTest {
 
   @Test
   public void createUser_userWithEmailAlreadyExists_throwsException() {
+    var accessToken = generateToken(NAME + EMAIL + PASSWORD);
     when(usersRepository.findByEmail(eq(EMAIL))).thenReturn(Optional.of(user));
     var errorMessage =
         assertThrows(ConflictException.class, () -> usersService.createUser(getUserRequest(EMAIL)))
@@ -85,6 +96,7 @@ class UsersServiceImplTest {
 
   @Test
   public void createUser_userWithEmailNotExistsButNameAlreadyExists_throwsException() {
+    var accessToken = generateToken(NAME + EMAIL + PASSWORD);
     when(usersRepository.findByEmail(eq(EMAIL))).thenReturn(Optional.empty());
     when(usersRepository.findByUsername(eq(NAME))).thenReturn(Optional.of(user));
     var errorMessage =
@@ -94,7 +106,8 @@ class UsersServiceImplTest {
   }
 
   @Test
-  public void createUser_userWithEmailOrNameNotExists_created() {
+  public void createUser_userWithEmailOrNameNotExists_created() throws ConflictException {
+    var accessToken = generateToken(NAME + EMAIL + PASSWORD);
     var userEntity = getUserEntity();
     when(usersRepository.findByEmail(eq(EMAIL))).thenReturn(Optional.empty());
     when(usersRepository.findByUsername(eq(NAME))).thenReturn(Optional.empty());
@@ -150,5 +163,16 @@ class UsersServiceImplTest {
             .countryCode(COUNTRY_CODE)
             .number(PHONE_NUMBER)
             .build());
+  }
+
+  public static String generateToken(String subject) {
+    byte[] secretBytes = java.util.Base64.getDecoder().decode(SECRET_KEY);
+    Key secretKey = new SecretKeySpec(secretBytes, SignatureAlgorithm.HS256.getJcaName());
+
+    return Jwts.builder()
+            .setSubject(subject)
+            .setExpiration(new Date(System.currentTimeMillis() + Long.valueOf(10800)*1000))
+            .signWith(secretKey)
+            .compact();
   }
 }

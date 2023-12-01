@@ -1,6 +1,8 @@
 package com.bci.users.auth;
 
 import com.bci.users.services.UsersService;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,10 +11,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.crypto.SecretKey;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+  @Value("${spring.security.jwt.secret}")
+  private String jwtSecret;
   private final UsersService usersService;
 
   public SecurityConfig(UsersService usersService) {
@@ -24,6 +31,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     return new BCryptPasswordEncoder();
   }
 
+  @Bean
+  public SecretKey secretKey() {
+    return Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
+  }
+
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
     // TODO configure authentication manager
@@ -33,16 +45,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     // TODO:Remove when JWT is active
-    http
+    http.csrf().disable()
             .authorizeRequests()
             .antMatchers("/oauth/token").permitAll()
             .anyRequest().authenticated()
             .and()
-            //.addFilterBefore()
-            //.and()
-            .csrf().disable();
-    //http.csrf().disable().authorizeRequests().anyRequest().permitAll();
-//    http.csrf().disable();
+            .addFilterBefore(new JwtTokenFilter("a7ZwvHhJ6759kb3EZS/TKXzCl59Qpz6K5AMxvQlDtnY="), UsernamePasswordAuthenticationFilter.class);
     http.headers().frameOptions().disable();
   }
 

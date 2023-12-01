@@ -1,12 +1,15 @@
 package com.bci.users.services.impl;
 
+import com.bci.users.auth.JwtUtil;
 import com.bci.users.entities.Phones;
 import com.bci.users.entities.Roles;
 import com.bci.users.entities.Users;
 import com.bci.users.exceptions.ConflictException;
+import com.bci.users.exceptions.NotFoundException;
 import com.bci.users.repositories.PhonesRepository;
 import com.bci.users.repositories.UsersRepository;
 import com.bci.users.requests.UserRequest;
+import com.bci.users.responses.LoginResponse;
 import com.bci.users.responses.Phone;
 import com.bci.users.responses.Role;
 import com.bci.users.responses.UserResponse;
@@ -17,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -31,14 +35,17 @@ public class UsersServiceImpl implements UsersService {
   private final UsersRepository usersRepository;
   private final PhonesRepository phonesRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final JwtUtil jwtUtil;
 
   public UsersServiceImpl(
       UsersRepository usersRepository,
       BCryptPasswordEncoder bCryptPasswordEncoder,
-      PhonesRepository phonesRepository) {
+      PhonesRepository phonesRepository,
+      JwtUtil jwtUtil) {
     this.usersRepository = usersRepository;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.phonesRepository = phonesRepository;
+    this.jwtUtil = jwtUtil;
   }
 
   @Override
@@ -65,7 +72,7 @@ public class UsersServiceImpl implements UsersService {
   }
 
   @Override
-  public UserResponse createUser(UserRequest userRequest) {
+  public UserResponse createUser(UserRequest userRequest) throws ConflictException {
     if (usersRepository.findByEmail(userRequest.getEmail()).isPresent()) {
       throw new ConflictException(
           String.format("User with email %s already exists.", userRequest.getEmail()));
@@ -74,6 +81,7 @@ public class UsersServiceImpl implements UsersService {
       throw new ConflictException(
           String.format("User with username %s already exists.", userRequest.getName()));
     }
+    var accessToken = jwtUtil.generateToken(userRequest.getName() + userRequest.getEmail() + userRequest.getPassword());
     List<Roles> roles =
         userRequest.getRoles().stream()
             .map(
@@ -94,6 +102,7 @@ public class UsersServiceImpl implements UsersService {
             .password(bCryptPasswordEncoder.encode(userRequest.getPassword()))
             .created(ZonedDateTime.now())
             .username(userRequest.getName())
+            .token(accessToken)
             .roles(roles)
             .build();
 
@@ -118,52 +127,32 @@ public class UsersServiceImpl implements UsersService {
         .created(userSaved.getCreated())
         .lastLogin(userSaved.getLastLogin())
         .isActive(userSaved.isActive())
+        .token(userSaved.getToken())
         .build();
   }
 
-  public List<UserResponse> retrieveAllUsers() {
-    var users = usersRepository.findAll();
-    if (users.isEmpty()) {
-      return Collections.EMPTY_LIST;
-    }
-
-    return users.stream()
-        .map(
-            user -> {
-              var roles =
-                  user.getRoles().stream()
-                      .map(
-                          role -> {
-                            return Role.builder()
-                                .id(role.getId().toString())
-                                .name(role.getName())
-                                .build();
-                          })
-                      .collect(Collectors.toList());
-              log.info(roles);
-              var phones =
-                  user.getPhones().stream()
-                      .map(
-                          phone -> {
-                            return Phone.builder()
-                                .number(phone.getNumber())
-                                .cityCode(phone.getCityCode())
-                                .countryCode(phone.getCountryCode())
-                                .build();
-                          })
-                      .collect(Collectors.toList());
-              return UserResponse.builder()
-                  .id(UUID.fromString(user.getId()))
-                  .created(user.getCreated())
-                  .lastLogin(user.getLastLogin())
-                  .isActive(user.isActive())
-                  // .name(user.getUsername())
-                  // .email(user.getEmail())
-                  // .password(user.getPassword())
-                  // .roles(roles)
-                  // .phones(phones)
-                  .build();
-            })
-        .collect(Collectors.toList());
+  @Override
+  public LoginResponse findByToken(String token) throws NotFoundException {
+    var optionalUser = usersRepository.findByToken(token);
+    var user = optionalUser.orElseThrow(() -> new NotFoundException(
+            String.format("User with token %s does not exist.",token)));
+    return LoginResponse.builder()
+            .id(UUID.fromString(user.getId()))
+            .created(user.getCreated())
+            .lastLogin(user.getLastLogin())
+            .token(user.getToken())
+            .isActive(user.isActive())
+            .name(user.getUsername())
+            .email(user.getEmail())
+            .password(user.getPassword())
+            .phones(user.getPhones().stream().map(phone -> {
+              return Phone.builder()
+                     .countryCode(phone.getCountryCode())
+                     .cityCode(phone.getCityCode())
+                     .number(phone.getNumber())
+                     .build();
+            }).collect(Collectors.toList()))
+            .build();
   }
+
 }

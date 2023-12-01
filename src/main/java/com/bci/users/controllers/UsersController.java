@@ -1,17 +1,25 @@
 package com.bci.users.controllers;
 
+import com.bci.users.auth.JwtUtil;
+import com.bci.users.exceptions.ConflictException;
+import com.bci.users.exceptions.ExceptionDetail;
 import com.bci.users.requests.UserRequest;
 import com.bci.users.services.UsersService;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
+import java.util.Optional;
+
 @Log4j2
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/sign-up")
 @Validated
 public class UsersController {
   private final UsersService usersService;
@@ -20,17 +28,9 @@ public class UsersController {
     this.usersService = usersService;
   }
 
-  @PostMapping("/sign-up")
-  public ResponseEntity<?> createUser(@RequestBody @Valid UserRequest userRequest) {
-    log.info("crearUsuario");
+  @PostMapping
+  public ResponseEntity<?> createUser(@RequestBody @Valid UserRequest userRequest) throws ConflictException {
     var response = usersService.createUser(userRequest);
     return new ResponseEntity<>(response, HttpStatus.CREATED);
-  }
-
-  @GetMapping
-  public ResponseEntity<?> retrieveUsers() {
-    log.info("retrieve users");
-    var response = usersService.retrieveAllUsers();
-    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }
