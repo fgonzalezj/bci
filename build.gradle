@@ -51,17 +51,16 @@ tasks.named('test') {
 }
 
 tasks.test {
-	finalizedBy jacocoTestReport // report is always generated after tests run
+	finalizedBy jacocoTestReport
 }
 jacocoTestReport {
-	dependsOn test // tests are required to run before generating the report
+	dependsOn test
 	reports {
 		html.destination file("${buildDir}/reports/jacoco/html")
 		xml.required = false
 		csv.required = false
 	}
 	afterEvaluate {
-		// Excluir clases específicas de la cobertura de código
 		classDirectories = files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: ['com/bci/users/controllers/**',
 										'com/bci/users/responses/**',
@@ -75,6 +74,5 @@ jacocoTestReport {
 spotless {
 	java {
 		googleJavaFormat()
-		// Aquí puedes agregar más configuraciones si es necesario
 	}
 }

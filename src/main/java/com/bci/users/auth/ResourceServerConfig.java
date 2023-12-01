@@ -12,8 +12,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
   public void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
         .antMatchers("/oauth/token", "/sign-up", "/login")
-        .permitAll() // Rutas públicas
+        .permitAll()
         .anyRequest()
-        .authenticated(); // Rutas que requieren autenticación con JWT
+        .authenticated();
   }
 }
