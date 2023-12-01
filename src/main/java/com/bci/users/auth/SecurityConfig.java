@@ -48,7 +48,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     http.csrf()
         .disable()
         .authorizeRequests()
-        .antMatchers("/oauth/token")
+            // remove the path '/login' to enable authentication through access_token
+        .antMatchers("/oautqh/token", "/sign-up", "/login")
         .permitAll()
         .anyRequest()
         .authenticated()
