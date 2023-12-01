@@ -48,10 +48,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
       Claims body = claimsJws.getBody();
       String username = body.getSubject();
 
-      Authentication authentication =
-          new UsernamePasswordAuthenticationToken(
-              username, null
-              );
+      Authentication authentication = new UsernamePasswordAuthenticationToken(username, null);
 
       SecurityContextHolder.getContext().setAuthentication(authentication);
     } catch (SignatureException e) {
