@@ -24,8 +24,7 @@ To build and run the application locally you can execute following commands:
 ```
 
 By default, the application will be available at http::localhost:8080 with the following endpoins:  
-- Create a new user:  
-Example in curl:
+- Create a new user, example in curl:
 ```
 curl --location --request POST 'localhost:8080/sign-up' \
   --header 'Content-Type: application/json' \ 
@@ -45,8 +44,7 @@ curl --location --request POST 'localhost:8080/sign-up' \
   ]
   }'
 ```  
-- Login by token:  
-  Example in curl:
+- Login by token, example in curl:
 ```
 curl --location --request GET 'localhost:8080/login?token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqbGVubm9uamxlbm5vbkBnbWFpbC5jb21wd2QxMjM0NSIsImV4cCI6MTgwOTQ1OTk5Mn0.67D3fFitva2xEL_hqssZXYTq9JjtZLX76gUUpnnFPeo' \
 ```
