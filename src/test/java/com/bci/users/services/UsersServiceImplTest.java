@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.bci.users.auth.JwtUtil;
 import com.bci.users.entities.Phones;
 import com.bci.users.entities.Roles;
 import com.bci.users.entities.Users;
@@ -57,6 +58,7 @@ class UsersServiceImplTest {
   @Mock private UsersRepository usersRepository;
   @Mock private BCryptPasswordEncoder bCryptPasswordEncoder;
   @Mock private PhonesRepository phonesRepository;
+  @Mock private JwtUtil jwtUtil;
 
   @BeforeEach
   void setUp() {
@@ -108,6 +110,7 @@ class UsersServiceImplTest {
     when(usersRepository.findByEmail(eq(EMAIL))).thenReturn(Optional.empty());
     when(usersRepository.findByUsername(eq(NAME))).thenReturn(Optional.empty());
     when(usersRepository.save(any(Users.class))).thenReturn(userEntity);
+    when(jwtUtil.generateToken(any(String.class))).thenReturn(accessToken);
     var responseExpected =
         UserResponse.builder()
             .id(UUID.fromString(userEntity.getId()))
