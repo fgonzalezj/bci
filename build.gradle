@@ -67,14 +67,3 @@ spotless {
 		// Aquí puedes agregar más configuraciones si es necesario
 	}
 }
-tasks.withType(JavaCompile).forEach { compileJavaTask ->
-	compileJavaTask.doLast {
-		spotlessCheck.applyTo(compileJavaTask.source)
-	}
-}
-
-tasks.withType(JavaCompile).forEach { compileJavaTask ->
-	compileJavaTask.doLast {
-		spotlessApply.applyTo(compileJavaTask.source)
-	}
-}
