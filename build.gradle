@@ -60,6 +60,17 @@ jacocoTestReport {
 		xml.required = false
 		csv.required = false
 	}
+	afterEvaluate {
+		// Excluir clases específicas de la cobertura de código
+		classDirectories = files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: ['com/bci/users/controllers/**',
+										'com/bci/users/responses/**',
+										'com/bci/users/requests/**',
+										'com/bci/users/auth/**',
+										'com/bci/users/exceptions/**'
+										,'com/bci/users/entities/**'])
+		})
+	}
 }
 spotless {
 	java {

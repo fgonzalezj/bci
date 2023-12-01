@@ -10,11 +10,13 @@ import com.bci.users.entities.Phones;
 import com.bci.users.entities.Roles;
 import com.bci.users.entities.Users;
 import com.bci.users.exceptions.ConflictException;
+import com.bci.users.exceptions.NotFoundException;
 import com.bci.users.repositories.PhonesRepository;
 import com.bci.users.repositories.UsersRepository;
 import com.bci.users.requests.Phone;
 import com.bci.users.requests.Role;
 import com.bci.users.requests.UserRequest;
+import com.bci.users.responses.LoginResponse;
 import com.bci.users.responses.UserResponse;
 import com.bci.users.services.impl.UsersServiceImpl;
 import io.jsonwebtoken.Jwts;
@@ -25,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,6 +125,66 @@ class UsersServiceImplTest {
     assertEquals(responseExpected, response);
   }
 
+  @Test
+  public void findUserByToken_userNotFound_throwsException() {
+    var accessToken = generateToken(NAME + EMAIL + PASSWORD);
+    when(usersRepository.findByToken(eq(accessToken))).thenReturn(Optional.empty());
+    var errorMessage =
+        assertThrows(NotFoundException.class, () -> usersService.findByToken(accessToken))
+            .getMessage();
+    assertEquals(String.format("User with token %s does not exist.", accessToken), errorMessage);
+  }
+
+  @Test
+  public void findUserByToken_userFound_responseSuccessful() throws NotFoundException {
+    var accessToken = generateToken(NAME + EMAIL + PASSWORD);
+    var userEntity = getUserEntity();
+    when(usersRepository.findByToken(eq(accessToken))).thenReturn(Optional.of(userEntity));
+    var expectedResponse =
+        LoginResponse.builder()
+            .id(UUID.fromString(userEntity.getId()))
+            .created(userEntity.getCreated())
+            .lastLogin(userEntity.getLastLogin())
+            .token(userEntity.getToken())
+            .isActive(userEntity.isActive())
+            .name(userEntity.getUsername())
+            .email(userEntity.getEmail())
+            .password(userEntity.getPassword())
+            .phones(
+                userEntity.getPhones().stream()
+                    .map(
+                        phone -> {
+                          return com.bci.users.responses.Phone.builder()
+                              .countryCode(phone.getCountryCode())
+                              .cityCode(phone.getCityCode())
+                              .number(phone.getNumber())
+                              .build();
+                        })
+                    .collect(Collectors.toList()))
+            .build();
+    var response = usersService.findByToken(accessToken);
+    assertEquals(expectedResponse, response);
+  }
+
+  @Test
+  public void loadUserByUsername_userNotFound_throwsException() {
+    when(usersRepository.findByUsername(eq(NAME))).thenReturn(Optional.empty());
+    var errorMessage =
+        assertThrows(
+                org.springframework.security.core.userdetails.UsernameNotFoundException.class,
+                () -> usersService.loadUserByUsername(NAME))
+            .getMessage();
+    assertEquals(String.format("User with name %s does not exist,", NAME), errorMessage);
+  }
+
+  @Test
+  public void loadUserByUsername_userFound_successful() {
+    when(usersRepository.findByUsername(eq(NAME))).thenReturn(Optional.of(getUserEntity()));
+    var response = usersService.loadUserByUsername(NAME);
+    assertNotNull(response);
+    assertEquals(NAME, response.getUsername());
+  }
+
   private static UserRequest getUserRequest(String email) {
     return UserRequest.builder()
         .email(email)
@@ -144,6 +207,7 @@ class UsersServiceImplTest {
   private static Users getUserEntity() {
     return Users.builder()
         .id(UUID.randomUUID().toString())
+        .username(NAME)
         .created(ZonedDateTime.now())
         .lastLogin(ZonedDateTime.now())
         .email(EMAIL)
