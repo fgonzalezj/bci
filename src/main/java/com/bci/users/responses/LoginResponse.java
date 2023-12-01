@@ -1,12 +1,11 @@
 package com.bci.users.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
-
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder
@@ -22,14 +21,19 @@ public class LoginResponse {
 
   @JsonProperty("is_active")
   private boolean isActive;
+
   @JsonProperty("token")
   private String token;
+
   @JsonProperty("name")
   private String name;
+
   @JsonProperty("email")
   private String email;
+
   @JsonProperty("password")
   private String password;
+
   @JsonProperty("phones")
   private List<Phone> phones;
 }

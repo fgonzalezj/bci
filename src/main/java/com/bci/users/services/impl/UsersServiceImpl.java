@@ -11,16 +11,13 @@ import com.bci.users.repositories.UsersRepository;
 import com.bci.users.requests.UserRequest;
 import com.bci.users.responses.LoginResponse;
 import com.bci.users.responses.Phone;
-import com.bci.users.responses.Role;
 import com.bci.users.responses.UserResponse;
 import com.bci.users.services.UsersService;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -81,7 +78,9 @@ public class UsersServiceImpl implements UsersService {
       throw new ConflictException(
           String.format("User with username %s already exists.", userRequest.getName()));
     }
-    var accessToken = jwtUtil.generateToken(userRequest.getName() + userRequest.getEmail() + userRequest.getPassword());
+    var accessToken =
+        jwtUtil.generateToken(
+            userRequest.getName() + userRequest.getEmail() + userRequest.getPassword());
     List<Roles> roles =
         userRequest.getRoles().stream()
             .map(
@@ -134,25 +133,30 @@ public class UsersServiceImpl implements UsersService {
   @Override
   public LoginResponse findByToken(String token) throws NotFoundException {
     var optionalUser = usersRepository.findByToken(token);
-    var user = optionalUser.orElseThrow(() -> new NotFoundException(
-            String.format("User with token %s does not exist.",token)));
+    var user =
+        optionalUser.orElseThrow(
+            () ->
+                new NotFoundException(String.format("User with token %s does not exist.", token)));
     return LoginResponse.builder()
-            .id(UUID.fromString(user.getId()))
-            .created(user.getCreated())
-            .lastLogin(user.getLastLogin())
-            .token(user.getToken())
-            .isActive(user.isActive())
-            .name(user.getUsername())
-            .email(user.getEmail())
-            .password(user.getPassword())
-            .phones(user.getPhones().stream().map(phone -> {
-              return Phone.builder()
-                     .countryCode(phone.getCountryCode())
-                     .cityCode(phone.getCityCode())
-                     .number(phone.getNumber())
-                     .build();
-            }).collect(Collectors.toList()))
-            .build();
+        .id(UUID.fromString(user.getId()))
+        .created(user.getCreated())
+        .lastLogin(user.getLastLogin())
+        .token(user.getToken())
+        .isActive(user.isActive())
+        .name(user.getUsername())
+        .email(user.getEmail())
+        .password(user.getPassword())
+        .phones(
+            user.getPhones().stream()
+                .map(
+                    phone -> {
+                      return Phone.builder()
+                          .countryCode(phone.getCountryCode())
+                          .cityCode(phone.getCityCode())
+                          .number(phone.getNumber())
+                          .build();
+                    })
+                .collect(Collectors.toList()))
+        .build();
   }
-
 }

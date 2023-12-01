@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.bci.users.auth.JwtUtil;
 import com.bci.users.entities.Phones;
 import com.bci.users.entities.Roles;
 import com.bci.users.entities.Users;
@@ -17,16 +16,15 @@ import com.bci.users.requests.Role;
 import com.bci.users.requests.UserRequest;
 import com.bci.users.responses.UserResponse;
 import com.bci.users.services.impl.UsersServiceImpl;
-
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import java.security.Key;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +34,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.Validator;
-
-import javax.crypto.spec.SecretKeySpec;
 
 @ExtendWith({MockitoExtension.class})
 class UsersServiceImplTest {
@@ -170,9 +166,9 @@ class UsersServiceImplTest {
     Key secretKey = new SecretKeySpec(secretBytes, SignatureAlgorithm.HS256.getJcaName());
 
     return Jwts.builder()
-            .setSubject(subject)
-            .setExpiration(new Date(System.currentTimeMillis() + Long.valueOf(10800)*1000))
-            .signWith(secretKey)
-            .compact();
+        .setSubject(subject)
+        .setExpiration(new Date(System.currentTimeMillis() + Long.valueOf(10800) * 1000))
+        .signWith(secretKey)
+        .compact();
   }
 }

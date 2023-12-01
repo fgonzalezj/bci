@@ -20,6 +20,7 @@ public class UserResponse {
 
   @JsonProperty("is_active")
   private boolean isActive;
+
   @JsonProperty("token")
   private String token;
   //    private String name;

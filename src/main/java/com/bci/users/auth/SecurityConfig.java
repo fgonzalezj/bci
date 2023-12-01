@@ -2,6 +2,7 @@ package com.bci.users.auth;
 
 import com.bci.users.services.UsersService;
 import io.jsonwebtoken.security.Keys;
+import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,13 +14,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.crypto.SecretKey;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Value("${spring.security.jwt.secret}")
   private String jwtSecret;
+
   private final UsersService usersService;
 
   public SecurityConfig(UsersService usersService) {
@@ -45,12 +45,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     // TODO:Remove when JWT is active
-    http.csrf().disable()
-            .authorizeRequests()
-            .antMatchers("/oauth/token").permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .addFilterBefore(new JwtTokenFilter("a7ZwvHhJ6759kb3EZS/TKXzCl59Qpz6K5AMxvQlDtnY="), UsernamePasswordAuthenticationFilter.class);
+    http.csrf()
+        .disable()
+        .authorizeRequests()
+        .antMatchers("/oauth/token")
+        .permitAll()
+        .anyRequest()
+        .authenticated()
+        .and()
+        .addFilterBefore(
+            new JwtTokenFilter("a7ZwvHhJ6759kb3EZS/TKXzCl59Qpz6K5AMxvQlDtnY="),
+            UsernamePasswordAuthenticationFilter.class);
     http.headers().frameOptions().disable();
   }
 

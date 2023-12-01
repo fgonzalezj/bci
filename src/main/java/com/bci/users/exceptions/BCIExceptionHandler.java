@@ -23,14 +23,13 @@ public class BCIExceptionHandler {
             ZonedDateTime.now());
     return new ResponseEntity<>(detail, HttpStatus.BAD_REQUEST);
   }
+
   @ExceptionHandler(MissingServletRequestParameterException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseEntity<ExceptionDetail> handleMissingRequestParameterException(MissingServletRequestParameterException e) {
+  public ResponseEntity<ExceptionDetail> handleMissingRequestParameterException(
+      MissingServletRequestParameterException e) {
     var detail =
-            new ExceptionDetail(
-                    HttpStatus.BAD_REQUEST.value(),
-                    e.getMessage(),
-                    ZonedDateTime.now());
+        new ExceptionDetail(HttpStatus.BAD_REQUEST.value(), e.getMessage(), ZonedDateTime.now());
     return new ResponseEntity<>(detail, HttpStatus.BAD_REQUEST);
   }
 
@@ -54,7 +53,7 @@ public class BCIExceptionHandler {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ResponseEntity<ExceptionDetail> handleNotFoundException(NotFoundException e) {
     var detail =
-            new ExceptionDetail(HttpStatus.NOT_FOUND.value(), e.getMessage(), ZonedDateTime.now());
+        new ExceptionDetail(HttpStatus.NOT_FOUND.value(), e.getMessage(), ZonedDateTime.now());
     return new ResponseEntity<>(detail, HttpStatus.NOT_FOUND);
   }
 }
