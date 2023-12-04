@@ -56,7 +56,7 @@ tasks.test {
 jacocoTestReport {
 	dependsOn test
 	reports {
-		html.destination file("/htmlReport/reports/jacoco/html")
+		html.destination file("htmlReport/reports/jacoco/html")
 		xml.required = false
 		csv.required = false
 	}
