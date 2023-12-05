@@ -1,14 +1,21 @@
 # Spring Boot User Management and Authentication Service
 
-This project is a Spring Boot-based RESTful service that provides functionalities for user account management and authentication.
+This project is a Spring Boot-based RESTful service that provides functionalities for user account management and authentication using JWT. It consists of 2 end-points which are described below.
 ## Prerequisites
+### Installation
 
 Ensure you have the following installed before running the application:
 
-- SpringBoot (version 2.5.14)
 - Java (version 11)
 - Gradle (version 7)
+### Dependencies 
+In the build.gradle file, you can find all the dependencies required to compile and run the project, which are listed below:
 - H2 database (configured in `application.properties`)
+- SpringBoot (version 2.5.14)
+- Jacoco 
+- Lombok
+- JWT (version 0.12.3)
+- Spring security OAuth2 (version 2.5.2)
 
 ## Project Setup
 
@@ -23,7 +30,7 @@ To build and run the application locally you can execute following commands:
 ./gradlew bootRun
 ```
 
-By default, the application will be available at http::localhost:8080 with the following endpoins:  
+By default, the application will be available at http::localhost:8080 with the following end-points:  
 - Create a new user, example in curl:
 ```
 curl --location --request POST 'localhost:8080/sign-up' \
@@ -39,7 +46,7 @@ curl --location --request POST 'localhost:8080/sign-up' \
   }
   ],
   "roles": [{
-  "name":"ROLE_ADMIN"
+  "name":""
   }
   ]
   }'
@@ -54,9 +61,11 @@ In order to execute unit tests locally and generate a report for code coverage e
 ```
 ./gradlew test jacocoTestReport
 ```
-Once it finishes, you will be able to see the code coverage report in the directory 'build/reports/jacoco/index.html'. 
+Once it finishes, you will be able to see the code coverage report in the directory 'htmlReport/reports/jacoco/index.html'. 
 ## Formatting code
 To provide a standard format to our code automatically, we can use the Spotless tool by executing the command:
 ```
 ./gradlew spotlessApply
 ```
+## UML diagrams 
+Into the `/diagrams` directory you can find the UML diagrams for the application.
