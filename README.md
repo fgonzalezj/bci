@@ -1,14 +1,25 @@
 # Spring Boot User Management and Authentication Service
+## Table of contents 
+1. [General Info](#general-info)
+2. [Prerequisites](#prerequisites)
+3. [Dependencies](#dependencies)
+4. [Project Setup](#project-setup)
+5. [Build and Run](#build-and-run)
+6. [Run tests and generate jacoco report for code coverage](#run-tests-and-generate-jacoco-report-for-code-coverage)
+7. [Formatting code](#formatting-code)
+8. [UML diagrams](#uml-diagrams)
 
+### General Info
+***
 This project is a Spring Boot-based RESTful service that provides functionalities for user account management and authentication using JWT. It consists of 2 end-points which are described below.
 ## Prerequisites
-### Installation
-
+***
 Ensure you have the following installed before running the application:
 
 - Java (version 11)
 - Gradle (version 7)
-### Dependencies 
+## Dependencies 
+***
 In the build.gradle file, you can find all the dependencies required to compile and run the project, which are listed below:
 - H2 database (configured in `application.properties`)
 - SpringBoot (version 2.5.14)
@@ -18,12 +29,13 @@ In the build.gradle file, you can find all the dependencies required to compile 
 - Spring security OAuth2 (version 2.5.2)
 
 ## Project Setup
-
+***
 1. Clone the repository: `git clone https://github.com/fgonzalezj/bci.git`
 2. Navigate to the project directory: `cd bci`
 3. Configure the database properties in the `application.properties` file.
 
 ## Build and Run
+***
 To build and run the application locally you can execute following commands:
 ```
 ./gradlew clean build
@@ -57,15 +69,18 @@ curl --location --request GET 'localhost:8080/login?token=eyJhbGciOiJIUzI1NiJ9.e
 ```
 Noticed: Replace the token with the token obtained when creating a new user.  
 ## Run tests and generate jacoco report for code coverage.
+***
 In order to execute unit tests locally and generate a report for code coverage execute following command:
 ```
 ./gradlew test jacocoTestReport
 ```
 Once it finishes, you will be able to see the code coverage report in the directory 'htmlReport/reports/jacoco/index.html'. 
 ## Formatting code
+***
 To provide a standard format to our code automatically, we can use the Spotless tool by executing the command:
 ```
 ./gradlew spotlessApply
 ```
 ## UML diagrams 
+***
 Into the `/diagrams` directory you can find the UML diagrams for the application.
