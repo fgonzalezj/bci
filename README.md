@@ -84,3 +84,6 @@ To provide a standard format to our code automatically, we can use the Spotless 
 ## UML diagrams 
 ***
 Into the `/diagrams` directory you can find the UML diagrams for the application.
+## Documentation
+***
+You can find the Swagger documentation at  http://localhost:8080/swagger-ui/ .
