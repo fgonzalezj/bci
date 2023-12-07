@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -49,7 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .disable()
         .authorizeRequests()
         // remove the path '/login' to enable authentication through access_token
-        .antMatchers("/oautqh/token", "/sign-up", "/login")
+        .antMatchers("/oauth/token", "/sign-up", "/login", "/swagger-ui/**","/swagger-resources/**")
         .permitAll()
         .anyRequest()
         .authenticated()
@@ -58,6 +59,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             new JwtTokenFilter("a7ZwvHhJ6759kb3EZS/TKXzCl59Qpz6K5AMxvQlDtnY="),
             UsernamePasswordAuthenticationFilter.class);
     http.headers().frameOptions().disable();
+  }
+
+  @Override
+  public void configure(WebSecurity web) throws Exception {
+    web.ignoring().antMatchers("/swagger-ui/**","/v2/api-docs/**");
   }
 
   @Override
