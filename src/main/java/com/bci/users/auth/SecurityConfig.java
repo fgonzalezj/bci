@@ -50,7 +50,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .disable()
         .authorizeRequests()
         // remove the path '/login' to enable authentication through access_token
-        .antMatchers("/oauth/token", "/sign-up", "/login", "/swagger-ui/**","/swagger-resources/**")
+        .antMatchers(
+            "/oauth/token", "/sign-up", "/login", "/swagger-ui/**", "/swagger-resources/**")
         .permitAll()
         .anyRequest()
         .authenticated()
@@ -63,7 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   public void configure(WebSecurity web) throws Exception {
-    web.ignoring().antMatchers("/swagger-ui/**","/v2/api-docs/**");
+    web.ignoring().antMatchers("/swagger-ui/**", "/v2/api-docs/**");
   }
 
   @Override
